@@ -7,7 +7,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -15,11 +14,7 @@ import java.util.*;
  */
 public class JsonUtils {
 
-  private final static ObjectMapper objectMapper = new ObjectMapper();
-
-  static {
-    objectMapper.setDateFormat(new SimpleDateFormat("yyyy-MM-dd HH:mm:ss"));
-  }
+  private static final ObjectMapper objectMapper = new ObjectMapper();
 
   private JsonUtils() { }
 
