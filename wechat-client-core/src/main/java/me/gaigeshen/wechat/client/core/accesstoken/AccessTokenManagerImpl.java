@@ -57,23 +57,22 @@ public class AccessTokenManagerImpl implements AccessTokenManager {
   }
 
   @Override
-  public AccessToken saveAccessToken(AccessToken accessToken) throws AccessTokenManagerException {
+  public AccessToken findAccessToken(String appid) throws AccessTokenManagerException {
+    try {
+      return accessTokenStore.findByAppid(appid);
+    } catch (AccessTokenStoreException e) {
+      throw new AccessTokenManagerException("Could not find access token because store exception:: " + appid, e);
+    }
+  }
+
+  @Override
+  public void saveAccessToken(AccessToken accessToken) throws AccessTokenManagerException {
     try {
       if (accessTokenStore.saveOrUpdate(accessToken)) {
         new AccessTokenUpdateTask(accessToken).start();
       }
     } catch (AccessTokenStoreException e) {
       throw new AccessTokenManagerException("Could not save access token because store exception:: " + accessToken.getAppid(), e);
-    }
-    return accessToken;
-  }
-
-  @Override
-  public AccessToken findAccessToken(String appid) throws AccessTokenManagerException {
-    try {
-      return accessTokenStore.findByAppid(appid);
-    } catch (AccessTokenStoreException e) {
-      throw new AccessTokenManagerException("Could not find access token because store exception:: " + appid, e);
     }
   }
 

@@ -21,15 +21,6 @@ public interface AccessTokenManager {
   AccessTokenStore getAccessTokenStore();
 
   /**
-   * 保存访问令牌
-   *
-   * @param accessToken 访问令牌
-   * @return 该访问令牌
-   * @throws AccessTokenManagerException 访问令牌管理器异常
-   */
-  AccessToken saveAccessToken(AccessToken accessToken) throws AccessTokenManagerException;
-
-  /**
    * 查询访问令牌
    *
    * @param appid 应用编号
@@ -37,6 +28,14 @@ public interface AccessTokenManager {
    * @throws AccessTokenManagerException 访问令牌管理器异常
    */
   AccessToken findAccessToken(String appid) throws AccessTokenManagerException;
+
+  /**
+   * 保存访问令牌
+   *
+   * @param accessToken 访问令牌
+   * @throws AccessTokenManagerException 访问令牌管理器异常
+   */
+  void saveAccessToken(AccessToken accessToken) throws AccessTokenManagerException;
 
   /**
    * 删除访问令牌
