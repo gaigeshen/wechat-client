@@ -13,17 +13,21 @@ import java.util.*;
  */
 public class ContentParserUrlEncodedFormImpl implements ContentParser<String> {
 
-  private static final String DEFAULT_ENCODING = "utf-8";
+  private static final String DEFAULT_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
-  private String encoding = DEFAULT_ENCODING;
+  private static final String DEFAULT_CONTENT_ENCODING = "utf-8";
 
-  private boolean snakeContentFields = true;
+  private final String contentEncoding;
+
+  private final boolean snakeContentFields;
 
   private ContentParserUrlEncodedFormImpl() {
+    this.contentEncoding = DEFAULT_CONTENT_ENCODING;
+    this.snakeContentFields = true;
   }
 
-  private ContentParserUrlEncodedFormImpl(String encoding, boolean snakeContentFields) {
-    this.encoding = encoding;
+  private ContentParserUrlEncodedFormImpl(String contentEncoding, boolean snakeContentFields) {
+    this.contentEncoding = contentEncoding;
     this.snakeContentFields = snakeContentFields;
   }
 
@@ -31,10 +35,19 @@ public class ContentParserUrlEncodedFormImpl implements ContentParser<String> {
     return new ContentParserUrlEncodedFormImpl();
   }
 
-  public static ContentParserUrlEncodedFormImpl create(String encoding, boolean snakeContentFields) {
-    return new ContentParserUrlEncodedFormImpl(Asserts.notBlank(encoding, "encoding"), snakeContentFields);
+  public static ContentParserUrlEncodedFormImpl create(String contentEncoding, boolean snakeContentFields) {
+    return new ContentParserUrlEncodedFormImpl(Asserts.notBlank(contentEncoding, "encoding"), snakeContentFields);
   }
 
+  @Override
+  public String getContentType() {
+    return DEFAULT_CONTENT_TYPE;
+  }
+
+  @Override
+  public String getContentEncoding() {
+    return contentEncoding;
+  }
 
   @Override
   public String parse(Content content) throws ContentParserException {
@@ -47,7 +60,7 @@ public class ContentParserUrlEncodedFormImpl implements ContentParser<String> {
     for (Map.Entry<String, Object> entry : fieldValues.entrySet()) {
       nameValuePairs.add(new BasicNameValuePair(entry.getKey(), String.valueOf(entry.getValue())));
     }
-    return URLEncodedUtils.format(nameValuePairs, encoding);
+    return URLEncodedUtils.format(nameValuePairs, contentEncoding);
   }
 
   private Map<String, Object> getFieldValues(Content content, boolean snakeFieldNames) throws ContentParserException {

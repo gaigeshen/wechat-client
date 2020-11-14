@@ -5,6 +5,10 @@ package me.gaigeshen.wechat.client.core.request;
  */
 public interface ContentParser<C> {
 
+  String getContentType();
+
+  String getContentEncoding();
+
   C parse(Content content) throws ContentParserException;
 
 }
