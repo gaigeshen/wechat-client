@@ -7,18 +7,10 @@ public interface Request<C> {
 
   Content getContent();
 
-  C getSerializedContent();
-
-  String getContentType();
-
-  String getContentEncoding();
-
   String getUrl();
 
   String getMethod();
 
   boolean isRequireAccessToken();
-
-  Class<? extends Result> getResultClass();
 
 }
