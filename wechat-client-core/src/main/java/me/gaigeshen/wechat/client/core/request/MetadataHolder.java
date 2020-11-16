@@ -1,41 +1,53 @@
 package me.gaigeshen.wechat.client.core.request;
 
-import me.gaigeshen.wechat.client.core.util.Asserts;
-
-import java.util.Objects;
-
 /**
  * @author gaigeshen
  */
-public class MetadataHolder {
+class MetadataHolder {
 
-  private final Metadata metadata;
+  private final String url;
 
-  public MetadataHolder(Content content) {
-    this.metadata = extractMetadata(Asserts.notNull(content, "content"));
-  }
+  private final String method;
 
-  private Metadata extractMetadata(Content content) {
-    Metadata annotation = content.getClass().getAnnotation(Metadata.class);
-    if (Objects.isNull(annotation)) {
-      throw new IllegalStateException("");
-    }
-    return annotation;
+  private final boolean requireAccessToken;
+
+  private final boolean json;
+
+  private final boolean urlEncoded;
+
+  private final boolean multipart;
+
+  MetadataHolder(String url, String method, boolean requireAccessToken, boolean json, boolean urlEncoded, boolean multipart) {
+    this.url = url;
+    this.method = method;
+    this.requireAccessToken = requireAccessToken;
+    this.json = json;
+    this.urlEncoded = urlEncoded;
+    this.multipart = multipart;
   }
 
   public String getUrl() {
-    return metadata.url();
+    return url;
   }
 
   public String getMethod() {
-    return metadata.method();
+    return method;
   }
 
   public boolean isRequireAccessToken() {
-    return metadata.requireAccessToken();
+    return requireAccessToken;
   }
 
-  public Class<? extends Result> getResultClass() {
-    return metadata.resultClass();
+  public boolean isJson() {
+    return json;
   }
+
+  public boolean isUrlEncoded() {
+    return urlEncoded;
+  }
+
+  public boolean isMultipart() {
+    return multipart;
+  }
+
 }

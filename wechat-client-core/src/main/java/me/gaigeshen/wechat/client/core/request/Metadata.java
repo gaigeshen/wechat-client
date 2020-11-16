@@ -10,12 +10,16 @@ import java.lang.annotation.*;
 @Documented
 public @interface Metadata {
 
-  String url();
+  String url() default "";
 
   String method() default "post";
 
   boolean requireAccessToken() default true;
 
-  Class<? extends Result> resultClass();
+  boolean json() default true;
+
+  boolean urlEncoded() default false;
+
+  boolean multipart() default false;
 
 }
