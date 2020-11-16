@@ -9,6 +9,6 @@ public interface ContentParser<C> {
 
   String getContentEncoding();
 
-  C parse(Content content) throws ContentParserException;
+  C parse(Content<?> content) throws ContentParserException;
 
 }

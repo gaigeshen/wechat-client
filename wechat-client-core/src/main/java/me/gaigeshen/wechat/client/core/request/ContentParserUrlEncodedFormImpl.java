@@ -50,7 +50,7 @@ public class ContentParserUrlEncodedFormImpl implements ContentParser<String> {
   }
 
   @Override
-  public String parse(Content content) throws ContentParserException {
+  public String parse(Content<?> content) throws ContentParserException {
     Asserts.notNull(content, "content");
     Map<String, Object> fieldValues = getFieldValues(content, snakeContentFields);
     if (fieldValues.isEmpty()) {

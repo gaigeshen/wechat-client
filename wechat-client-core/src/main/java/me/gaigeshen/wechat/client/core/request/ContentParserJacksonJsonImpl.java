@@ -46,7 +46,7 @@ public class ContentParserJacksonJsonImpl implements ContentParser<String> {
   }
 
   @Override
-  public String parse(Content content) throws ContentParserException {
+  public String parse(Content<?> content) throws ContentParserException {
     Asserts.notNull(content, "content");
     try {
       return JsonUtils.toJson(content, objectMapper);
