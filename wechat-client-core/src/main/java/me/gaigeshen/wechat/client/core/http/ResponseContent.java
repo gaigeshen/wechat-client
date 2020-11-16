@@ -10,7 +10,7 @@ public interface ResponseContent {
 
   byte[] getRawBytes();
 
-  String getContentType();
+  String getType();
 
   String getAsString();
 

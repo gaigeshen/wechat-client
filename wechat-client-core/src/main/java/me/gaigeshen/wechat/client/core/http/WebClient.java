@@ -96,13 +96,12 @@ public class WebClient implements Closeable {
     try {
       return new HttpGet(req.getUri());
     } catch (Exception e) {
-      throw new InvalidRequestContentException("Invalid uri:: " + req);
+      throw new InvalidRequestContentException("Invalid uri:: " + req, e);
     }
   }
 
   private HttpPost createHttpPost(RequestContent req) throws InvalidRequestContentException {
     HttpPost post = new HttpPost(req.getUri());
-    ContentType contentType = ContentType.create(req.getContentType(), req.getContentEncoding());
     if (Objects.nonNull(req.getMultipartParameters())) {
       boolean validMultipart = false;
       MultipartEntityBuilder multipartBuilder = MultipartEntityBuilder.create();
@@ -130,7 +129,11 @@ public class WebClient implements Closeable {
       post.setEntity(multipartBuilder.build());
       return post;
     }
-    EntityBuilder builder = EntityBuilder.create().setContentType(contentType).setContentEncoding(req.getContentEncoding());
+    if (Objects.isNull(req.getType())) {
+      throw new InvalidRequestContentException("Request content type can not be null::");
+    }
+    ContentType contentType = req.getType().createContentType(req.getEncoding());
+    EntityBuilder builder = EntityBuilder.create().setContentType(contentType).setContentEncoding(req.getEncoding());
     if (Objects.nonNull(req.getText())) {
       builder.setText(req.getText());
     } else if (Objects.nonNull(req.getBinary())) {
@@ -158,7 +161,7 @@ public class WebClient implements Closeable {
         return content.asBytes();
       }
       @Override
-      public String getContentType() {
+      public String getType() {
         return content.getType().getMimeType();
       }
       @Override
