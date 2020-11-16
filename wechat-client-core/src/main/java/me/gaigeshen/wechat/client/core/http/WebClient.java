@@ -5,6 +5,7 @@ import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.fluent.ContentResponseHandler;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.config.Registry;
 import org.apache.http.config.RegistryBuilder;
@@ -14,7 +15,6 @@ import org.apache.http.conn.socket.PlainConnectionSocketFactory;
 import org.apache.http.conn.ssl.NoopHostnameVerifier;
 import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
 import org.apache.http.impl.client.AbstractResponseHandler;
-import org.apache.http.impl.client.BasicResponseHandler;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -68,8 +68,8 @@ public class WebClient implements Closeable {
             .build();
   }
 
-  public String execute(HttpUriRequest req) throws WebClientException {
-    return execute(req, new BasicResponseHandler());
+  public ResponseContent execute(HttpUriRequest req) throws WebClientException {
+    return new ResponseContentImpl(execute(req, new ContentResponseHandler()));
   }
 
   public <T> T execute(HttpUriRequest req, AbstractResponseHandler<T> handler) throws WebClientException {
