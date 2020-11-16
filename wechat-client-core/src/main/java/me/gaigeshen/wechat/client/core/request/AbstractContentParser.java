@@ -1,12 +1,38 @@
 package me.gaigeshen.wechat.client.core.request;
 
+import org.apache.commons.lang3.StringUtils;
+
 import java.lang.reflect.Field;
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @author gaigeshen
  */
 public abstract class AbstractContentParser<C> implements ContentParser<C> {
+
+  private static final Map<Class<?>, Metadata> metadatas = new ConcurrentHashMap<>();
+
+  protected boolean checkMetadata(Metadata metadata) {
+    return Objects.nonNull(metadata) && (!StringUtils.isAnyBlank(metadata.getUrl(), metadata.getMethod()));
+  }
+
+  protected Metadata getMetadata(Content<?> content) {
+    return metadatas.computeIfAbsent(content.getClass(), contentClass -> {
+      MetadataAttributes metadataAttributes = contentClass.getAnnotation(MetadataAttributes.class);
+      if (Objects.isNull(metadataAttributes)) {
+        return null;
+      }
+      return Metadata.create()
+              .setUrl(metadataAttributes.url())
+              .setMethod(metadataAttributes.method())
+              .setRequireAccessToken(metadataAttributes.requireAccessToken())
+              .setJson(metadataAttributes.json())
+              .setUrlEncoded(metadataAttributes.urlEncoded())
+              .setMultipart(metadataAttributes.multipart())
+              .build();
+    });
+  }
 
   protected Map<String, Object> getFieldValues(Content<?> content, boolean snakeFieldNames) throws ContentParserException {
     List<Field> fields = getFields(content.getClass());

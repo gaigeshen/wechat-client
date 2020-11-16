@@ -17,13 +17,17 @@ public class Metadata {
 
   private final boolean multipart;
 
-  public Metadata(String url, String method, boolean requireAccessToken, boolean json, boolean urlEncoded, boolean multipart) {
-    this.url = url;
-    this.method = method;
-    this.requireAccessToken = requireAccessToken;
-    this.json = json;
-    this.urlEncoded = urlEncoded;
-    this.multipart = multipart;
+  private Metadata(Builder builder) {
+    this.url = builder.url;
+    this.method = builder.method;
+    this.requireAccessToken = builder.requireAccessToken;
+    this.json = builder.json;
+    this.urlEncoded = builder.urlEncoded;
+    this.multipart = builder.multipart;
+  }
+
+  public static Builder create() {
+    return new Builder();
   }
 
   public String getUrl() {
@@ -50,4 +54,55 @@ public class Metadata {
     return multipart;
   }
 
+  /**
+   * @author gaigeshen
+   */
+  public static class Builder {
+
+    private String url;
+
+    private String method;
+
+    private boolean requireAccessToken;
+
+    private boolean json;
+
+    private boolean urlEncoded;
+
+    private boolean multipart;
+
+    public Builder setUrl(String url) {
+      this.url = url;
+      return this;
+    }
+
+    public Builder setMethod(String method) {
+      this.method = method;
+      return this;
+    }
+
+    public Builder setRequireAccessToken(boolean requireAccessToken) {
+      this.requireAccessToken = requireAccessToken;
+      return this;
+    }
+
+    public Builder setJson(boolean json) {
+      this.json = json;
+      return this;
+    }
+
+    public Builder setUrlEncoded(boolean urlEncoded) {
+      this.urlEncoded = urlEncoded;
+      return this;
+    }
+
+    public Builder setMultipart(boolean multipart) {
+      this.multipart = multipart;
+      return this;
+    }
+
+    public Metadata build() {
+      return new Metadata(this);
+    }
+  }
 }
