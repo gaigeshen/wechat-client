@@ -132,7 +132,7 @@ public class WebClient implements Closeable {
     if (Objects.isNull(req.getType())) {
       throw new InvalidRequestContentException("Request content type can not be null::");
     }
-    ContentType contentType = req.getType().createContentType(req.getEncoding());
+    ContentType contentType = req.getType().parseToContentType(req.getEncoding());
     EntityBuilder builder = EntityBuilder.create().setContentType(contentType).setContentEncoding(req.getEncoding());
     if (Objects.nonNull(req.getText())) {
       builder.setText(req.getText());

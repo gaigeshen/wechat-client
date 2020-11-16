@@ -55,12 +55,21 @@ public interface RequestContent {
       return value;
     }
 
-    public ContentType createContentType() {
+    public ContentType parseToContentType() {
       return ContentType.create(value);
     }
 
-    public ContentType createContentType(String charset) {
+    public ContentType parseToContentType(String charset) {
       return ContentType.create(value, charset);
+    }
+
+    public Type parseFromName(String name) {
+      for (Type type : values()) {
+        if (type.value.equals(name)) {
+          return type;
+        }
+      }
+      throw new IllegalArgumentException("Invalid name:: " + name);
     }
 
     @Override
