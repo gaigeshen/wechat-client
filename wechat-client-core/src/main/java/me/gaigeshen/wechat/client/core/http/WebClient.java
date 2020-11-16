@@ -50,7 +50,7 @@ public class WebClient implements Closeable {
   private final CloseableHttpClient client;
 
   public static Builder builder() {
-    return Builder.create();
+    return new Builder();
   }
 
   private WebClient(int connectionRequestTimeout, int connectTimeout, int socketTimeout, SSLContext sslContext) {
@@ -200,10 +200,6 @@ public class WebClient implements Closeable {
     private int connectTimeout = 2000;
     private int socketTimeout = 5000;
     private SSLContext sslContext = null;
-
-    public static Builder create() {
-      return new Builder();
-    }
 
     public Builder setConnectionRequestTimeout(int connectionRequestTimeout) {
       this.connectionRequestTimeout = Asserts.positive(connectionRequestTimeout, "connectionRequestTimeout");
