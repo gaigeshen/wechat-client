@@ -1,25 +1,53 @@
 package me.gaigeshen.wechat.client.core.request;
 
-import java.lang.annotation.*;
-
 /**
  * @author gaigeshen
  */
-@Target({ElementType.TYPE})
-@Retention(RetentionPolicy.RUNTIME)
-@Documented
-public @interface Metadata {
+public class Metadata {
 
-  String url() default "";
+  private final String url;
 
-  String method() default "post";
+  private final String method;
 
-  boolean requireAccessToken() default true;
+  private final boolean requireAccessToken;
 
-  boolean json() default true;
+  private final boolean json;
 
-  boolean urlEncoded() default false;
+  private final boolean urlEncoded;
 
-  boolean multipart() default false;
+  private final boolean multipart;
+
+  public Metadata(String url, String method, boolean requireAccessToken, boolean json, boolean urlEncoded, boolean multipart) {
+    this.url = url;
+    this.method = method;
+    this.requireAccessToken = requireAccessToken;
+    this.json = json;
+    this.urlEncoded = urlEncoded;
+    this.multipart = multipart;
+  }
+
+  public String getUrl() {
+    return url;
+  }
+
+  public String getMethod() {
+    return method;
+  }
+
+  public boolean isRequireAccessToken() {
+    return requireAccessToken;
+  }
+
+  public boolean isJson() {
+    return json;
+  }
+
+  public boolean isUrlEncoded() {
+    return urlEncoded;
+  }
+
+  public boolean isMultipart() {
+    return multipart;
+  }
 
 }
