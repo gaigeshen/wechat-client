@@ -6,6 +6,8 @@ import java.io.InputStream;
 import java.util.Map;
 
 /**
+ * The default request content
+ *
  * @author gaigeshen
  */
 public class RequestContentImpl implements RequestContent {
@@ -40,18 +42,41 @@ public class RequestContentImpl implements RequestContent {
     this.multipartParameters = builder.multipartParameters;
   }
 
+  /**
+   * Returns builder for build request content object
+   *
+   * @return The builder
+   */
   public static Builder builder() {
     return new Builder();
   }
 
+  /**
+   * Returns builder for build request content object, build json type request content
+   *
+   * @param text Json string value
+   * @return The builder
+   */
   public static Builder createJson(String text) {
     return builder().setType(Type.TEXT_JSON).setText(text);
   }
 
+  /**
+   * Returns builder for build request content object, build parameters type request content
+   *
+   * @param parameters Parameters value
+   * @return The builder
+   */
   public static Builder createParameters(Map<String, String> parameters) {
     return builder().setType(Type.PARAMETERS).setParameters(parameters);
   }
 
+  /**
+   * eturns builder for build request content object, build multipart type request content
+   *
+   * @param multipartParameters Multipart parameters value
+   * @return The builder
+   */
   public static Builder createMultipartParameters(Map<String, Object> multipartParameters) {
     return builder().setType(Type.MULTIPART_PARAMETERS).setMultipartParameters(multipartParameters);
   }
@@ -102,6 +127,8 @@ public class RequestContentImpl implements RequestContent {
   }
 
   /**
+   * The builder for build request content
+   *
    * @author gaigeshen
    */
   public static class Builder {
@@ -169,6 +196,11 @@ public class RequestContentImpl implements RequestContent {
       return this;
     }
 
+    /**
+     * Build method
+     *
+     * @return Request content
+     */
     public RequestContentImpl build() {
       return new RequestContentImpl(this);
     }

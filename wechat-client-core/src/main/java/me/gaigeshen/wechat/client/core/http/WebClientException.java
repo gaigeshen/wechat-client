@@ -1,6 +1,8 @@
 package me.gaigeshen.wechat.client.core.http;
 
 /**
+ * Web client exception
+ *
  * @author gaigeshen
  */
 public class WebClientException extends Exception {

@@ -1,6 +1,8 @@
 package me.gaigeshen.wechat.client.core.http;
 
 /**
+ * Request content invalid
+ *
  * @author gaigeshen
  */
 public class InvalidRequestContentException extends WebClientException {

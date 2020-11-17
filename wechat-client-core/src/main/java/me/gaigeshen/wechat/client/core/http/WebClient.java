@@ -1,6 +1,7 @@
 package me.gaigeshen.wechat.client.core.http;
 
 import me.gaigeshen.wechat.client.core.util.Asserts;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.http.HeaderElement;
 import org.apache.http.HeaderElementIterator;
 import org.apache.http.HttpResponse;
@@ -43,6 +44,8 @@ import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
 /**
+ * The web client for execute http request
+ *
  * @author gaigeshen
  */
 public class WebClient implements Closeable {
@@ -83,7 +86,17 @@ public class WebClient implements Closeable {
             .build();
   }
 
+  /**
+   * Execute request with request content, {@link RequestContent#getMethod()} can only support 'get' and 'post'
+   *
+   * @param req Request content
+   * @return Response content
+   * @throws WebClientException Execute failed
+   */
   public ResponseContent execute(RequestContent req) throws WebClientException {
+    if (StringUtils.isAnyBlank(req.getUri(), req.getMethod())) {
+      throw new InvalidRequestContentException("The uri and method can not be blank or null:: " + req);
+    }
     if ("get".equalsIgnoreCase(req.getMethod())) {
       return execute(createHttpGet(req));
     } else if ("post".equalsIgnoreCase(req.getMethod())) {
@@ -92,6 +105,13 @@ public class WebClient implements Closeable {
     throw new InvalidRequestContentException("Can only support 'get' and 'post' method:: " + req);
   }
 
+  /**
+   * Create http get object with request content
+   *
+   * @param req Request content
+   * @return Http get object
+   * @throws InvalidRequestContentException Cannot create http get object
+   */
   private HttpGet createHttpGet(RequestContent req) throws InvalidRequestContentException {
     try {
       return new HttpGet(req.getUri());
@@ -100,59 +120,97 @@ public class WebClient implements Closeable {
     }
   }
 
+  /**
+   * Create http post object with request content
+   *
+   * @param req Request content
+   * @return Http post object
+   * @throws InvalidRequestContentException The request content invalid
+   */
   private HttpPost createHttpPost(RequestContent req) throws InvalidRequestContentException {
+    if (Objects.isNull(req.getType())) {
+      throw new InvalidRequestContentException("The type can not be null:: " + req);
+    }
     HttpPost post = new HttpPost(req.getUri());
-    if (Objects.nonNull(req.getMultipartParameters())) {
-      boolean validMultipart = false;
-      MultipartEntityBuilder multipartBuilder = MultipartEntityBuilder.create();
-      for (Map.Entry<String, Object> entry : req.getMultipartParameters().entrySet()) {
-        if (entry.getValue() instanceof byte[]) {
-          multipartBuilder.addBinaryBody(entry.getKey(), (byte[]) entry.getValue());
-          validMultipart = true;
-        }
-        if (entry.getValue() instanceof File) {
-          multipartBuilder.addBinaryBody(entry.getKey(), (File) entry.getValue());
-          validMultipart = true;
-        }
-        if (entry.getValue() instanceof InputStream) {
-          multipartBuilder.addBinaryBody(entry.getKey(), (InputStream) entry.getValue());
-          validMultipart = true;
-        }
-        if (entry.getValue() instanceof String) {
-          multipartBuilder.addTextBody(entry.getKey(), (String) entry.getValue());
-          validMultipart = true;
-        }
-      }
-      if (!validMultipart) {
-        throw new InvalidRequestContentException("Invalid multipart parameters:: " + req);
-      }
-      post.setEntity(multipartBuilder.build());
+    // Multipart type ?
+    if (req.getType().equals(RequestContent.Type.MULTIPART_PARAMETERS)) {
+      configMultipartHttpPost(post, req);
       return post;
     }
-    if (Objects.isNull(req.getType())) {
-      throw new InvalidRequestContentException("Request content type can not be null::");
-    }
-    ContentType contentType = req.getType().parseToContentType(req.getEncoding());
-    EntityBuilder builder = EntityBuilder.create().setContentType(contentType).setContentEncoding(req.getEncoding());
-    if (Objects.nonNull(req.getText())) {
-      builder.setText(req.getText());
-    } else if (Objects.nonNull(req.getBinary())) {
-      builder.setBinary(req.getBinary());
-    } else if (Objects.nonNull(req.getStream())) {
-      builder.setStream(req.getStream());
-    } else if (Objects.nonNull(req.getParameters())) {
-      List<NameValuePair> nameValuePairs = new ArrayList<>();
-      for (Map.Entry<String, String> entry : req.getParameters().entrySet()) {
-        nameValuePairs.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
-      }
-      builder.setParameters(nameValuePairs);
-    } else {
-      throw new InvalidRequestContentException("Could not find request content data:: " + req);
+    // Other type ?
+    String encoding = StringUtils.isBlank(req.getEncoding()) ? "utf-8" : req.getEncoding();
+    ContentType contentType = req.getType().parseContentType(encoding);
+    EntityBuilder builder = EntityBuilder.create().setContentType(contentType).setContentEncoding(encoding);
+    switch (req.getType()) {
+      case TEXT_JSON:
+      case TEXT_PLAIN:
+        if (StringUtils.isBlank(req.getText())) {
+          throw new InvalidRequestContentException("The text can not be blank or null:: " + req);
+        }
+        builder.setText(req.getText());
+        break;
+      case BINARY:
+        if (Objects.isNull(req.getBinary())) {
+          throw new InvalidRequestContentException("The binary can not be null:: " + req);
+        }
+        builder.setBinary(req.getBinary());
+        break;
+      case STREAM:
+        if (Objects.isNull(req.getStream())) {
+          throw new InvalidRequestContentException("The stream can not be null:: " + req);
+        }
+        builder.setStream(req.getStream());
+        break;
+      case PARAMETERS:
+        if (Objects.isNull(req.getParameters())) {
+          throw new InvalidRequestContentException("The parameters can not be null:: " + req);
+        }
+        List<NameValuePair> nameValuePairs = new ArrayList<>();
+        for (Map.Entry<String, String> entry : req.getParameters().entrySet()) {
+          nameValuePairs.add(new BasicNameValuePair(entry.getKey(), entry.getValue()));
+        }
+        builder.setParameters(nameValuePairs);
+        break;
     }
     post.setEntity(builder.build());
     return post;
   }
 
+  /**
+   * If the request content type is multipart, call this method to configure the http post object
+   *
+   * @param post The http post object
+   * @param req The request content
+   * @throws InvalidRequestContentException If request content invalid
+   */
+  private void configMultipartHttpPost(HttpPost post, RequestContent req) throws InvalidRequestContentException {
+    Map<String, Object> parameters = req.getMultipartParameters();
+    if (Objects.isNull(parameters)) {
+      throw new InvalidRequestContentException("The multipart parameters can not be null:: " + req);
+    }
+    MultipartEntityBuilder multipartBuilder = MultipartEntityBuilder.create();
+    for (Map.Entry<String, Object> entry : parameters.entrySet()) {
+      // Can only support byte[], file, input stream and string value
+      if (entry.getValue() instanceof byte[]) {
+        multipartBuilder.addBinaryBody(entry.getKey(), (byte[]) entry.getValue());
+      } else if (entry.getValue() instanceof File) {
+        multipartBuilder.addBinaryBody(entry.getKey(), (File) entry.getValue());
+      } else if (entry.getValue() instanceof InputStream) {
+        multipartBuilder.addBinaryBody(entry.getKey(), (InputStream) entry.getValue());
+      } else if (entry.getValue() instanceof String) {
+        multipartBuilder.addTextBody(entry.getKey(), (String) entry.getValue());
+      }
+    }
+    post.setEntity(multipartBuilder.build());
+  }
+
+  /**
+   * Execute with http uri request object
+   *
+   * @param req The http uri request object
+   * @return Response content
+   * @throws WebClientException Execute failed
+   */
   public ResponseContent execute(HttpUriRequest req) throws WebClientException {
     Content content = execute(req, new ContentResponseHandler());
     return new ResponseContent() {
@@ -179,6 +237,15 @@ public class WebClient implements Closeable {
     };
   }
 
+  /**
+   * Execute with http uri request object and response handler
+   *
+   * @param req The http uri request object
+   * @param handler The response handler
+   * @param <T> Result object
+   * @return The result object after executed
+   * @throws WebClientException Execute failed
+   */
   public <T> T execute(HttpUriRequest req, AbstractResponseHandler<T> handler) throws WebClientException {
     try {
       return client.execute(req, handler);
