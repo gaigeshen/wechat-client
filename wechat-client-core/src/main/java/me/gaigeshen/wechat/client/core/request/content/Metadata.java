@@ -1,6 +1,8 @@
-package me.gaigeshen.wechat.client.core.request;
+package me.gaigeshen.wechat.client.core.request.content;
 
 /**
+ * Content class metadata
+ *
  * @author gaigeshen
  */
 public class Metadata {
@@ -55,6 +57,8 @@ public class Metadata {
   }
 
   /**
+   * Builder for build metadata
+   *
    * @author gaigeshen
    */
   public static class Builder {
